@@ -1,0 +1,43 @@
+name: publish
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validation.yml
+
+  build:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: wakamex/release-actions/verify-release-tag@main
+        with:
+          version-command: cat VERSION
+      - name: Build the assets
+        run: |
+          mkdir release-assets
+          echo "test asset for $GITHUB_REF_NAME" > "release-assets/test-$GITHUB_REF_NAME-x86_64-linux.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-assets
+          path: release-assets/
+          if-no-files-found: error
+
+  release:
+    needs: build
+    permissions:
+      artifact-metadata: write
+      attestations: write
+      contents: write
+      id-token: write
+    uses: wakamex/release-actions/.github/workflows/binary-release.yml@main
+    with:
+      artifact: release-assets

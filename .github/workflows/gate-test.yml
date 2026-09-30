@@ -1,0 +1,27 @@
+name: gate-test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fails:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: exit 1
+  skipped:
+    needs: fails
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo never
+  validate:
+    name: validate
+    if: always()
+    needs: [skipped]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: wakamex/release-actions/validate-gate@main
+        with:
+          needs: ${{ toJSON(needs) }}

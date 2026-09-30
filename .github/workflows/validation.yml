@@ -1,0 +1,26 @@
+name: validation
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo built
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo checked
+  validate:
+    name: validate
+    if: always()
+    needs: [build, check]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: wakamex/release-actions/validate-gate@main
+        with:
+          needs: ${{ toJSON(needs) }}
