@@ -1,0 +1,13 @@
+name: python-pin-test
+
+on:
+  push:
+    branches: [main]
+    paths: [.python-version, tests/test_pin.py, .github/workflows/python-pin-test.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  pinned:
+    uses: wakamex/release-actions/.github/workflows/python-validation.yml@main
